@@ -49,7 +49,7 @@ class standbyCommand extends AdminCommand
 	public static function msjs_en_standby( $bot_id=0 )
 	{
 	$pdo = DB::getPdo();     if (! DB::isDbConnected()) {  return false;      }
-	$sql = "select stand_by,message_on,message_off from stand_by where  id_bot = $bot_id ";  	
+	$sql = "select stand_by,message_on from stand_by where  id_bot = $bot_id ";  	
 	$result='';
 	try {
 		$sth=$pdo->prepare($sql);
@@ -64,20 +64,16 @@ class standbyCommand extends AdminCommand
 	}
     public function execute()
     {
-
-
-			$message = $this->getMessage() ?: $this->getEditedMessage();
-			$chat    = $message->getChat();
-			$user    = $message->getFrom();
-			$chat_id = $chat->getId();
-			$user_id = $user->getId();
-			$text    = trim($message->getText(true));
-
-        
+		$message = $this->getMessage() ?: $this->getEditedMessage();
+		$chat    = $message->getChat();
+		$user    = $message->getFrom();
+		$chat_id = $chat->getId();
+		$user_id = $user->getId();
+		$text    = trim($message->getText(true));
 		$data = [
-            'chat_id'      => $chat_id,			
-            'text'         => "*Stand by* ".PHP_EOL,           
-        ];
+			    'chat_id'      => $chat_id,			
+			    'text'         => "*Stand by* ".PHP_EOL,           
+			];
 		$mantenimiento = $this->esta_en_standby( $this->getTelegram()->getBotId()	);
 		if ( $text <> 'on' && $text <> 'off')
 		{
@@ -86,16 +82,17 @@ class standbyCommand extends AdminCommand
 			if (!$mantenimiento )  $data['text'] .="OPERATIVO";
 			return Request::sendMessage($data);
 		}
-		if ( $text == 'on' )  $this->standby( true , $this->getTelegram()->getBotId() );
-		if ( $text == 'off' ) $this->standby(  0   , $this->getTelegram()->getBotId() );
-		if ( $this->esta_en_standby( $this->getTelegram()->getBotId()	))
+		if ( $text == 'on' )  
 		{
+			$this->standby( true , $this->getTelegram()->getBotId() );
 			$mensaje = $this->msjs_en_standby( $this->getTelegram()->getBotId() );
 			$data['text'].="Nuevo estado:  En mantenimiento ".$mensaje.PHP_EOL.date('d / m G:i:s');
+
 		}
-		else
+	    	else
 		{
-			$data['text'].="Nuevo estado: OPERATIVO".$mensaje.PHP_EOL.date('d / m G:i:s');
+			$this->standby(  0   , $this->getTelegram()->getBotId() );
+			$data['text'].="Nuevo estado: OPERATIVO".PHP_EOL.date('d / m G:i:s');
 		}		
 		return Request::sendMessage($data);
 		
