@@ -15,6 +15,7 @@ Put on:
 			}
       
 
+
 needs a table:
 CREATE TABLE `stand_by` (
   `id_bot` bigint(12) NOT NULL,
